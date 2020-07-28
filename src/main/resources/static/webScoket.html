@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+<input id="message" type="text" value="" placeholder="message"> <br/>
+<input type="button" value="发送消息" onclick="sendMessage()"/><br/>
+<hr>
+<div id="reMessage"></div>
+<script>
+	var wsUrl = "ws://127.0.0.1:8087";
+    var socket = new WebSocket(wsUrl);
+    console.log(socket.readyState)
+    socket.onopen = function (event) {
+        console.log("connect suc");
+        // 监听消息
+        socket.onmessage = function (event) {
+            console.log('received message->\t' + event.data);
+			var doc = document.createElement("div");
+			doc.append(event.data);
+			document.getElementById('reMessage').appendChild(doc);
+        };
+
+        // 监听Socket的关闭
+        socket.onclose = function (event) {
+            console.log('Client notified socket has closed');
+        };
+
+        // 关闭Socket....
+        //socket.close()
+    };
+
+    function sendMessage() {
+		let custom = '{"data":{"params":"'+ document.getElementById('message').value +'"},"first":1,"second":1}';
+		socket.send(document.getElementById('message').value);
+    }
+
+    function heartbeat() {
+        let data = {};
+        data['id'] = 1;
+        data['route'] = 'heartbeat';
+        let req_data = {};
+        req_data.page_name = 3;
+        //data['req_data'] = req_data;
+        let str = JSON.stringify(data);
+        socket.send(str);
+    }
+
+    setInterval(function () {
+        // heartbeat();
+		if (socket.readyState == 3) {
+			// console.log('reOpen Socket ...' + socket.readyState);
+			//socket = new WebSocket(wsUrl);
+			// console.log(socket.readyState === 1 ? 'reOpen success ...' : 'reOpen fail ...')
+		}
+    }, 3000);
+</script>
+</body>
+</html>
+　　
